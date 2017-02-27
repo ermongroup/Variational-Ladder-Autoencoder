@@ -90,7 +90,10 @@ class NoisyTrainer:
         return error / num_batch
 
     def plot_reconstruction(self, epoch, test_image, noisy_image, reconstruction, num_plot=3):
-        canvas = np.zeros((num_plot*self.data_dims[0], 3*self.data_dims[1] + 20, self.data_dims[2]))
+        if test_image.shape[-1] == 1:   # Black background for mnist, white for color images
+            canvas = np.zeros((num_plot*self.data_dims[0], 3*self.data_dims[1] + 20, self.data_dims[2]))
+        else:
+            canvas = np.ones((num_plot*self.data_dims[0], 3*self.data_dims[1] + 20, self.data_dims[2]))
         for img_index in range(num_plot):
             canvas[img_index*self.data_dims[0]:(img_index+1)*self.data_dims[0], 0:self.data_dims[1]] = \
                 self.dataset.display(test_image[img_index, :, :])
