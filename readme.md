@@ -14,7 +14,7 @@ To run the experiments, make sure you have a working environment of tensorflow w
 
 You don't need to prepare the dataset for MNIST so long as you installed the examples that come with standard tensorflow distributions. If you can import ```tensorflow.examples.tutorials.mnist``` then simply run 
 
-``` python train.py --dataset=mnist```
+``` python main.py --dataset=mnist```
 
 You should see results like this
 
@@ -28,7 +28,7 @@ For SVHN download the dataset from http://ufldl.stanford.edu/housenumbers/
 
 Download the three files [train_32x32.mat](http://ufldl.stanford.edu/housenumbers/train_32x32.mat), [test_32x32.mat](http://ufldl.stanford.edu/housenumbers/test_32x32.mat) , [extra_32x32.mat](http://ufldl.stanford.edu/housenumbers/extra_32x32.mat) and place them into a folder and pass the absolute path of this folder as the ```db_path``` argument. Run 
 
-``` python train.py --dataset=svhn --db_path=/path/to/svhn/dataset ```
+``` python main.py --dataset=svhn --db_path=/path/to/svhn/dataset ```
 
 You should see decoupling like below
 
@@ -44,7 +44,7 @@ Download the [aligned and cropped version](https://drive.google.com/open?id=0B7E
 
 Now you can train by running
 
-``` python train.py --dataset=celebA --db_path=/path/to/celebA/dataset ```
+``` python main.py --dataset=celebA --db_path=/path/to/celebA/dataset ```
 
 You should see decoupling like below
 
@@ -54,6 +54,7 @@ You should see decoupling like below
 
 - To use a particular GPU/GPUs add option ```--gpus=[ids]``` such as ```--gpus=0,1``` to use GPU 0 and 1. No additional multi-gpu support is used other than the default tensorflow support. In general for any of the recommended datasets the network generates good samples after running for about an hour on a single Titan X. The visualizations in the paper are produced after 1-2 days of training, but the improvement becomes marginal after the initial few hours. 
 - To use other architectures other than default, use ```--netname=[name]```. For supported architectures please refer to code. The name is the unique identifier for the network, and all related training log, visualizations, and checkpoint files, etc will be stored in the directory ```$pwd/model/netname```. For example, to run visualization with tensorboard use ``` tensorboard --logdir=[that directory]```.
+- To also visualize the training process with a GUI window add ```--use_gui```. By default all plots will be stored to network directory, this will also plot them in a window in addition to that.
 - To change batch size, add ``` --batch_size=[size]```
 - To visualize and plot the autoencoding reconstruction of the model, add ```--plot_reconstruction```
 - To add Gaussian and salt and pepper noise to perform denoise training add ```--denoise_train```
