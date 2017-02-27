@@ -1,6 +1,6 @@
 from abstract_network import *
 import os
-
+import scipy.misc as misc
 
 class Visualizer:
     def __init__(self, network):
@@ -28,6 +28,19 @@ class Visualizer:
         fig.savefig(os.path.join(img_folder, fig_name))
         self.save_epoch += 1
 
+    def arr_to_file(self, arr):
+        img_folder = "models/" + self.network.name + "/" + self.name
+        if not os.path.isdir(img_folder):
+            os.makedirs(img_folder)
+
+        if arr.shape[-1] == 1:
+            misc.imsave(os.path.join(img_folder, 'current.png'), arr[:, :, 0])
+            misc.imsave(os.path.join(img_folder, 'epoch%d.png' % self.save_epoch), arr[:, :, 0])
+        else:
+            misc.imsave(os.path.join(img_folder, 'current.png'), arr)
+            misc.imsave(os.path.join(img_folder, 'epoch%d.png' % self.save_epoch), arr)
+        self.save_epoch += 1
+
 
 class ConditionalSampleVisualizer(Visualizer):
     """ sess should be the session where the visualized network run,
@@ -37,11 +50,12 @@ class ConditionalSampleVisualizer(Visualizer):
         self.dataset = dataset
         self.name = "conditional_samples"
 
-    def visualize(self, layers, num_rows=4):
-        if self.fig is None:
+    def visualize(self, layers, num_rows=4, use_gui=False):
+        if use_gui and self.fig is None:
             self.fig, self.ax = plt.subplots(1, len(layers))
         latent_code = self.network.random_latent_code()
 
+        canvas_list = []
         for i, layer in enumerate(layers):
             samples = np.zeros([num_rows*num_rows]+self.dataset.data_dims)
             samples_ptr = 0
@@ -68,20 +82,29 @@ class ConditionalSampleVisualizer(Visualizer):
                         canvas[img_index1 * width:(img_index1 + 1) * width,
                             img_index2 * height:(img_index2 + 1) * height, :] = \
                             samples[img_index1 * num_rows + img_index2, :, :, :]
-                self.ax[i].cla()
-                if channel == 1:
-                    self.ax[i].imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
-                else:
-                    self.ax[i].imshow(canvas)
-                self.ax[i].xaxis.set_visible(False)
-                self.ax[i].yaxis.set_visible(False)
+                if use_gui:
+                    self.ax[i].cla()
+                    if channel == 1:
+                        self.ax[i].imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
+                    else:
+                        self.ax[i].imshow(canvas)
+                    self.ax[i].xaxis.set_visible(False)
+                    self.ax[i].yaxis.set_visible(False)
+                if i != 0:
+                    if canvas.shape[-1] == 1:
+                        canvas_list.append(np.zeros((width * num_rows, 20, channel)))
+                    else:
+                        canvas_list.append(np.ones((width * num_rows, 20, channel)))
+                canvas_list.append(canvas)
             else:
                 print("Warning: no samples generated during visualization")
         # np.save('samples', canvas)
-        self.fig.suptitle('Conditional Samples for %s' % self.network.name)
-        self.fig_to_file()
-        plt.draw()
-        plt.pause(0.01)
+        canvas = np.concatenate(canvas_list, axis=1)
+        self.arr_to_file(canvas)
+        if use_gui:
+            self.fig.suptitle('Conditional Samples for %s' % self.network.name)
+            plt.draw()
+            plt.pause(0.01)
 
 
 class SampleVisualizer(Visualizer):
@@ -93,8 +116,8 @@ class SampleVisualizer(Visualizer):
         self.dataset = dataset
         self.name = "samples"
 
-    def visualize(self, num_rows=10):
-        if self.fig is None:
+    def visualize(self, num_rows=10, use_gui=False):
+        if use_gui and self.fig is None:
             self.fig, self.ax = plt.subplots()
         samples = self.network.generate_samples()
         if samples is not None:
@@ -107,23 +130,20 @@ class SampleVisualizer(Visualizer):
                 for img_index2 in range(num_rows):
                     canvas[img_index1*width:(img_index1+1)*width, img_index2*height:(img_index2+1)*height, :] = \
                         samples[img_index1*num_rows+img_index2, :, :, :]
-            self.ax.cla()
-            if channel == 1:
-                self.ax.imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
-            else:
-                self.ax.imshow(canvas)
-            self.ax.xaxis.set_visible(False)
-            self.ax.yaxis.set_visible(False)
+            self.arr_to_file(canvas)
 
-            # if not os.path.isdir('result_log/%s' % self.network.name):
-            #     os.mkdir('result_log/%s' % self.network.name)
-            # np.save('result_log/%s/samples%d' % (self.network.name, self.count), canvas)
-            # np.save('result_log/%s/samples' % self.network.name, canvas)
-            self.fig.suptitle('Samples for %s' % self.network.name)
-            self.fig_to_file()
+            if use_gui:
+                self.ax.cla()
+                if channel == 1:
+                    self.ax.imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
+                else:
+                    self.ax.imshow(canvas)
+                self.ax.xaxis.set_visible(False)
+                self.ax.yaxis.set_visible(False)
 
-            plt.draw()
-            plt.pause(0.01)
+                self.fig.suptitle('Samples for %s' % self.network.name)
+                plt.draw()
+                plt.pause(0.01)
 
 
 class ManifoldSampleVisualizer(Visualizer):
@@ -133,9 +153,10 @@ class ManifoldSampleVisualizer(Visualizer):
         self.dataset = dataset
         self.name = "manifold_samples"
 
-    def visualize(self, layers, num_rows=4):
-        if self.fig is None:
+    def visualize(self, layers, num_rows=4, use_gui=False):
+        if use_gui and self.fig is None:
             self.fig, self.ax = plt.subplots(1, len(layers))
+        canvas_list = []
         for i, layer in enumerate(layers):
             samples = np.zeros([num_rows*num_rows]+self.dataset.data_dims)
             samples_ptr = 0
@@ -161,16 +182,26 @@ class ManifoldSampleVisualizer(Visualizer):
                         canvas[img_index1 * width:(img_index1 + 1) * width,
                         img_index2 * height:(img_index2 + 1) * height, :] = \
                             self.dataset.display(samples[img_index1 * num_rows + img_index2, :, :, :])
-                self.ax[i].cla()
-                if channel == 1:
-                    self.ax[i].imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
-                else:
-                    self.ax[i].imshow(canvas)
-                self.ax[i].xaxis.set_visible(False)
-                self.ax[i].yaxis.set_visible(False)
-        self.fig.suptitle('Manifold Samples for %s' % self.network.name)
-        self.fig_to_file()
-        plt.draw()
-        plt.pause(0.01)
+                if use_gui:
+                    self.ax[i].cla()
+                    if channel == 1:
+                        self.ax[i].imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
+                    else:
+                        self.ax[i].imshow(canvas)
+                    self.ax[i].xaxis.set_visible(False)
+                    self.ax[i].yaxis.set_visible(False)
+                if i != 0:
+                    if canvas.shape[-1] == 1:
+                        canvas_list.append(np.zeros((width * num_rows, 20, channel)))
+                    else:
+                        canvas_list.append(np.ones((width * num_rows, 20, channel)))
+                canvas_list.append(canvas)
+        canvas = np.concatenate(canvas_list, axis=1)
+        self.arr_to_file(canvas)
+
+        if use_gui:
+            self.fig.suptitle('Manifold Samples for %s' % self.network.name)
+            plt.draw()
+            plt.pause(0.01)
 
 

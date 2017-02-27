@@ -1,9 +1,6 @@
-import argparse
 from visualize import *
 import time
 
-from dataset import *
-from vladder import VLadder
 
 class NoisyTrainer:
     def __init__(self, network, dataset, args):
@@ -15,13 +12,8 @@ class NoisyTrainer:
         self.train_with_mask = False
         self.train_discrete = False
 
-        if args.plot_reconstruction:
-            plt.ion()
-            self.fig = plt.figure()
-            plt.show()
-            self.fig.suptitle("Reconstruction of " + str(self.network.name))
-            self.network = network
-
+        self.fig, self.ax = None, None
+        self.network = network
         self.test_reconstruction_error = True
 
     def get_noisy_input(self, original):
@@ -52,8 +44,6 @@ class NoisyTrainer:
         return np.clip(noisy_input, a_min=self.dataset.range[0], a_max=self.dataset.range[1])
 
     def train(self):
-        refresh_time = time.time()  # This is only a trick to prevent gui freeze for matplotlib
-
         # Visualization
         if self.network.do_generate_samples:
             sample_visualizer = SampleVisualizer(self.network, self.dataset)
@@ -64,10 +54,6 @@ class NoisyTrainer:
 
         for iteration in range(10000000):
             iter_time = time.time()
-            if time.time() - refresh_time > 0.2:
-                plt.pause(0.001)
-                refresh_time = time.time()
-
             images = self.dataset.next_batch(self.batch_size)
             noisy_input = self.get_noisy_input(images)
             train_loss = self.network.train(noisy_input, images)
@@ -77,86 +63,63 @@ class NoisyTrainer:
                       (iteration, train_loss, time.time() - iter_time))
 
             if iteration % 500 == 0:
-                test_error = self.test(5)
+                test_error = self.test(iteration//500, 5)
                 print("Reconstruction error @%d per pixel: " % iteration, test_error)
 
-            if iteration % 1000 == 0:
                 layers = [layer for layer in self.network.random_latent_code()]
                 layers.sort()
                 print("Visualizing %s" % layers)
                 if self.network.do_generate_samples:
-                    sample_visualizer.visualize(num_rows=10)
+                    sample_visualizer.visualize(num_rows=10, use_gui=self.args.use_gui)
                 if self.network.do_generate_conditional_samples:
-                    sample_visualizer_conditional.visualize(layers=layers, num_rows=10)
+                    sample_visualizer_conditional.visualize(layers=layers, num_rows=10, use_gui=self.args.use_gui)
                 if self.network.do_generate_manifold_samples:
-                    sample_visualizer_manifold.visualize(layers=layers, num_rows=30)
+                    sample_visualizer_manifold.visualize(layers=layers, num_rows=30, use_gui=self.args.use_gui)
 
     """ Returns reconstruction error per pixel """
-    def test(self, num_batch=3):
+    def test(self, epoch, num_batch=3):
         error = 0.0
         for test_iter in range(num_batch):
             test_image = self.dataset.next_test_batch(self.batch_size)
             noisy_test_image = self.get_noisy_input(test_image)
             reconstruction = self.network.test(noisy_test_image)
             error += np.sum(np.square(reconstruction - test_image)) / np.prod(self.data_dims[:2]) / self.batch_size
-            if test_iter == 0 and args.plot_reconstruction:
+            if test_iter == 0 and self.args.plot_reconstruction:
                 # Plot the original image, noisy image, and reconstructed image
-                self.plot_reconstruction(test_image, noisy_test_image, reconstruction)
+                self.plot_reconstruction(epoch, test_image, noisy_test_image, reconstruction)
         return error / num_batch
 
-    def plot_reconstruction(self, test_image, noisy_image, reconstruction, num_plot=3):
+    def plot_reconstruction(self, epoch, test_image, noisy_image, reconstruction, num_plot=3):
+        canvas = np.zeros((num_plot*self.data_dims[0], 3*self.data_dims[1] + 20, self.data_dims[2]))
         for img_index in range(num_plot):
-            if self.data_dims[-1] == 1:
-                self.fig.add_subplot(num_plot, 3, img_index*3+1).imshow(
-                    self.dataset.display(test_image[img_index, :, :, 0]), cmap=plt.get_cmap('Greys'))
-                self.fig.add_subplot(num_plot, 3, img_index*3+2).imshow(
-                    self.dataset.display(noisy_image[img_index, :, :, 0]), cmap=plt.get_cmap('Greys'))
-                self.fig.add_subplot(num_plot, 3, img_index*3+3).imshow(
-                    self.dataset.display(reconstruction[img_index, :, :, 0]), cmap=plt.get_cmap('Greys'))
+            canvas[img_index*self.data_dims[0]:(img_index+1)*self.data_dims[0], 0:self.data_dims[1]] = \
+                self.dataset.display(test_image[img_index, :, :])
+            canvas[img_index*self.data_dims[0]:(img_index+1)*self.data_dims[0], self.data_dims[1]+10:self.data_dims[1]*2+10] = \
+                self.dataset.display(noisy_image[img_index, :, :])
+            canvas[img_index*self.data_dims[0]:(img_index+1)*self.data_dims[0], self.data_dims[1]*2+20:] = \
+                self.dataset.display(reconstruction[img_index, :, :])
+
+        img_folder = "models/" + self.network.name + "/reconstruction"
+        if not os.path.isdir(img_folder):
+            os.makedirs(img_folder)
+
+        if canvas.shape[-1] == 1:
+            misc.imsave(os.path.join(img_folder, 'current.png'), canvas[:, :, 0])
+            misc.imsave(os.path.join(img_folder, 'epoch%d.png' % epoch), canvas[:, :, 0])
+        else:
+            misc.imsave(os.path.join(img_folder, 'current.png'), canvas)
+            misc.imsave(os.path.join(img_folder, 'epoch%d.png' % epoch), canvas)
+
+        if self.args.use_gui:
+            if self.fig is None:
+                self.fig, self.ax = plt.subplots()
+                self.fig.suptitle("Reconstruction of " + str(self.network.name))
+            self.ax.cla()
+            if canvas.shape[-1] == 1:
+                self.ax.imshow(canvas[:, :, 0], cmap=plt.get_cmap('Greys'))
             else:
-                self.fig.add_subplot(num_plot, 3, img_index*3+1).imshow(
-                    self.dataset.display(test_image[img_index]))
-                self.fig.add_subplot(num_plot, 3, img_index*3+2).imshow(
-                    self.dataset.display(noisy_image[img_index]))
-                self.fig.add_subplot(num_plot, 3, img_index*3+3).imshow(
-                    self.dataset.display(reconstruction[img_index]))
-        plt.draw()
-        plt.pause(1)
+                self.ax.imshow(canvas)
+            plt.draw()
+            plt.pause(1)
 
-# --dataset=svhn --denoise_train --plot_reconstruction --gpus=1 --db_path=dataset/svhn
-# --dataset=celebA --denoise_train --plot_reconstruction --gpus=0 --db_path=/ssd_data/CelebA
-# --dataset=mnist --gpus=2
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--gpus', type=str, default='')
-    parser.add_argument('--dataset', type=str, default='celebA')
-    parser.add_argument('--netname', type=str, default='')
-    parser.add_argument('--batch_size', type=int, default=100)
-    parser.add_argument('--db_path', type=str, default='')
-    parser.add_argument('--denoise_train', dest='denoise_train', action='store_true',
-                        help='Use denoise training by adding Gaussian/salt and pepper noise')
-    parser.add_argument('--plot_reconstruction', dest='plot_reconstruction', action='store_true',
-                        help='Plot reconstruction')
-    args = parser.parse_args()
-
-    if args.gpus is not '':
-        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
-
-    plt.ion()
-    plt.show()
-
-    if args.dataset == 'mnist':
-        dataset = MnistDataset()
-    elif args.dataset == 'lsun':
-        dataset = LSUNDataset(db_path=args.db_path)
-    elif args.dataset == 'celebA':
-        dataset = CelebADataset(db_path=args.db_path)
-    elif args.dataset == 'svhn':
-        dataset = SVHNDataset(db_path=args.db_path)
-    else:
-        print("Unknown dataset")
-        exit(-1)
-    model = VLadder(dataset, name=args.netname, batch_size=args.batch_size)
-    trainer = NoisyTrainer(model, dataset, args)
-    trainer.train()
 

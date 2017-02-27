@@ -1,5 +1,3 @@
-import sys, os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 try:    # Works for python 3
     from dataset.dataset import *
     from dataset.dataset_celeba import CelebADataset
