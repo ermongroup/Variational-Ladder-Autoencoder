@@ -3,18 +3,19 @@ import math, os
 from glob import glob
 import numpy as np
 import scipy.misc as misc
+from matplotlib import pyplot as plt
 
 class CelebADataset(Dataset):
-    def __init__(self, db_path="celebA", crop=False):
+    def __init__(self, db_path="celebA", crop=True):
         Dataset.__init__(self)
-        data_files = glob(os.path.join(db_path, "*.jpg"))
-        if len(data_files) < 100000:
-            print("Only %d images found for celebA, is this right?" % len(data_files))
+        self.data_files = glob(os.path.join(db_path, "*.jpg"))
+        if len(self.data_files) < 100000:
+            print("Only %d images found for celebA, is this right?" % len(self.data_files))
             exit(-1)
-        self.train_size = int(math.floor(len(data_files) * 0.8))
-        self.test_size = len(data_files) - self.train_size
-        self.train_img = data_files[:self.train_size]
-        self.test_img = data_files[self.train_size:]
+        self.train_size = int(math.floor(len(self.data_files) * 0.8))
+        self.test_size = len(self.data_files) - self.train_size
+        self.train_img = self.data_files[:self.train_size]
+        self.test_img = self.data_files[self.train_size:]
 
         self.train_idx = 0
         self.test_idx = 0
@@ -65,13 +66,13 @@ class CelebADataset(Dataset):
             return sample_images
 
     def batch_by_index(self, batch_start, batch_end):
-        sample_files = self.data[batch_start:batch_end]
+        sample_files = self.data_files[batch_start:batch_end]
         sample = [self.get_image(sample_file) for sample_file in sample_files]
         sample_images = np.array(sample).astype(np.float32)
         return sample_images
 
     @staticmethod
-    def get_image(image_path, is_crop=False):
+    def get_image(image_path, is_crop=True):
         image = CelebADataset.transform(misc.imread(image_path).astype(np.float), is_crop=is_crop)
         return image
 

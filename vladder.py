@@ -52,6 +52,7 @@ class VLadder(Network):
             self.ladder1_dim = 2
             self.ladder2_dim = 2
             self.num_layers = 3
+            self.error_scale = 8.0
             layers = SmallLayers(self)
             self.do_generate_manifold_samples = True
         else:
@@ -167,7 +168,7 @@ class VLadder(Network):
         self.train_op = tf.train.AdamOptimizer(0.0002).minimize(self.loss)
 
         # Set restart=True to not ignore previous checkpoint and restart training
-        self.init_network(restart=False)
+        self.init_network(restart=True)
         self.print_network()
         # Set read_only=True to not overwrite previous checkpoint
         self.read_only = False

@@ -6,6 +6,8 @@ This is the implementation of the Variational Ladder Autoencoder. Training on th
 
 LSUN is a little difficult for VAE with pixel-wise reconstruction loss. However another recent line of progress ```https://github.com/ShengjiaZhao/Sequential-VAE``` can generate sharp results on LSUN as well. This architecture serve as the baseline architecture for that model.
 
+To run the experiments, make sure you have a working version of tensorflow with either python 2 or 3. Simply download the code and run the following commands.
+
 # Training with Default Options
 
 ## MNIST
