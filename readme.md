@@ -2,9 +2,9 @@
 
 
 
-This is the implementation of the Variational Ladder Autoencoder presented in this paper. Training on this architecture with standard VAE disentangles high and low level features without using any other prior information or inductive bias. This has been successful on MNIST, SVHN, and CelebA. 
+This is the implementation of the Variational Ladder Autoencoder. Training on this architecture with standard VAE disentangles high and low level features without using any other prior information or inductive bias. This has been successful on MNIST, SVHN, and CelebA. 
 
-LSUN is a little difficult for VAE with pixel-wise reconstruction loss. However another recent line of progress can generate sharp results on LSUN as well. This architecture serve as the baseline architecture for that model.
+LSUN is a little difficult for VAE with pixel-wise reconstruction loss. However another recent line of progress ```https://github.com/ShengjiaZhao/Sequential-VAE``` can generate sharp results on LSUN as well. This architecture serve as the baseline architecture for that model.
 
 # Training with Default Options
 
@@ -52,4 +52,6 @@ You should see decoupling like below
 
 - To use a particular GPU/GPUs add option ```--gpus=[ids]``` such as ```--gpus=0,1``` to use GPU 0 and 1. No additional multi-gpu support is used other than the default tensorflow support. In general for any of the recommended datasets the network generates good samples after running for less than one hour on a single Titan X/1080. The visualizations in the paper are produced after 1-2 days of training, but the improvement becomes marginal after the initial few hours. 
 - To use other architectures other than default, use ```--netname=[name]```. For supported architectures please refer to code. The name is the unique identifier for the network, and all related training log, visualizations, and checkpoint files, etc will be stored in the directory ```$pwd/model/netname```. For example, to run visualization with tensorboard use ``` tensorboard --logdir=[that directory]```.
-- ​
+- To change batch size, add ``` --batch_size=[size]```
+- To visualize and plot the autoencoding reconstruction of the model, add ```--plot_reconstruction```
+- To add Gaussian and salt and pepper noise to perform denoise training add ```--denoise_train```

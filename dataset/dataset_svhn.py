@@ -70,7 +70,7 @@ class SVHNDataset(Dataset):
 
 if __name__ == '__main__':
     dataset = SVHNDataset(db_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), "svhn"))
-    images = dataset.next_batch()
+    images = dataset.next_batch(100)
     for i in range(100):
         plt.imshow(dataset.display(images[i]))
         plt.show()

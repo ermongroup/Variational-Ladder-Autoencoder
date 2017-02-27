@@ -96,8 +96,8 @@ class LargeLayers:
                 exit(0)
             conv1 = conv2d_t_bn_relu(latent1, self.network.cs[1], [4, 4], 2)
             output = tf.contrib.layers.convolution2d_transpose(conv1, self.network.data_dims[2], [4, 4], 1,
-                                                               activation_fn=tf.identity)
-            output = (self.network.dataset.range[1] - self.network.dataset.range[0]) * tf.nn.sigmoid(output) + \
+                                                               activation_fn=tf.sigmoid)
+            output = (self.network.dataset.range[1] - self.network.dataset.range[0]) * output + \
                 self.network.dataset.range[0]
             return output
 

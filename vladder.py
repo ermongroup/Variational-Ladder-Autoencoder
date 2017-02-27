@@ -16,6 +16,7 @@ class VLadder(Network):
 
         self.fs = [self.data_dims[0], self.data_dims[0] // 2, self.data_dims[0] // 4, self.data_dims[0] // 8,
                    self.data_dims[0] // 16]
+        self.error_scale = 16.0
 
         # Configurations
         if self.name == "vladder_celebA":
@@ -25,7 +26,6 @@ class VLadder(Network):
             self.ladder2_dim = 10
             self.ladder3_dim = 10
             self.num_layers = 4
-            self.error_scale = 16.0
             layers = LargeLayers(self)
             self.do_generate_conditional_samples = True
         elif self.name == "vladder_lsun":
@@ -35,7 +35,6 @@ class VLadder(Network):
             self.ladder2_dim = 20
             self.ladder3_dim = 40
             self.num_layers = 4
-            self.error_scale = 16.0
             layers = LargeLayers(self)
             self.do_generate_conditional_samples = True
         elif self.name == "vladder_svhn":
@@ -45,7 +44,6 @@ class VLadder(Network):
             self.ladder2_dim = 5
             self.ladder3_dim = 10
             self.num_layers = 4
-            self.error_scale = 16.0
             layers = MediumLayers(self)
             self.do_generate_conditional_samples = True
         elif self.name == "vladder_mnist":
@@ -54,7 +52,6 @@ class VLadder(Network):
             self.ladder1_dim = 2
             self.ladder2_dim = 2
             self.num_layers = 3
-            self.error_scale = 4.0
             layers = SmallLayers(self)
             self.do_generate_manifold_samples = True
         else:
@@ -170,7 +167,7 @@ class VLadder(Network):
         self.train_op = tf.train.AdamOptimizer(0.0002).minimize(self.loss)
 
         # Set restart=True to not ignore previous checkpoint and restart training
-        self.init_network(restart=True)
+        self.init_network(restart=False)
         self.print_network()
         # Set read_only=True to not overwrite previous checkpoint
         self.read_only = False

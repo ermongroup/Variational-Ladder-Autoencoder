@@ -75,8 +75,7 @@ class SmallLayers:
             conv1 = conv2d_t_bn_relu(fc1, self.network.cs[1], [4, 4], 2)
             output = tf.contrib.layers.convolution2d_transpose(conv1, self.network.data_dims[-1], [4, 4], 2,
                                                                activation_fn=tf.sigmoid)
-            output = (self.network.dataset.range[1] - self.network.dataset.range[0]) * tf.nn.sigmoid(output) + \
-                self.network.dataset.range[0]
+            output = (self.network.dataset.range[1] - self.network.dataset.range[0]) * output + self.network.dataset.range[0]
             return output
 
     def generative1(self, latent2, ladder1=None, reuse=False):
