@@ -124,8 +124,8 @@ class NoisyTrainer:
         plt.pause(1)
 
 # --dataset=svhn --denoise_train --plot_reconstruction --gpus=1 --db_path=dataset/svhn
-# --dataset=celebA --denoise_train --plot_reconstruction --gpus=2 --db_path=/ssd_data/CelebA
-# --dataset=mnist --gpus=0
+# --dataset=celebA --denoise_train --plot_reconstruction --gpus=0 --db_path=/ssd_data/CelebA
+# --dataset=mnist --gpus=2
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpus', type=str, default='')

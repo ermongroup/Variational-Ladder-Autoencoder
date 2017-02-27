@@ -1,5 +1,5 @@
 from dataset import *
-import math
+import math, os
 from glob import glob
 import numpy as np
 import scipy.misc as misc
@@ -38,7 +38,7 @@ class CelebADataset(Dataset):
             prev_idx = 0
 
         if self.train_idx < self.train_cache_top:
-            return self.train_cache[prev_idx:self.idx, :, :, :]
+            return self.train_cache[prev_idx:self.train_idx, :, :, :]
         else:
             sample_files = self.train_img[prev_idx:self.train_idx]
             sample = [self.get_image(sample_file, self.is_crop) for sample_file in sample_files]

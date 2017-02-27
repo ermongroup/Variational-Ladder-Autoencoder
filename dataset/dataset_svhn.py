@@ -1,6 +1,8 @@
 import scipy.io as sio
 from dataset import *
 import numpy as np
+from matplotlib import pyplot as plt
+import os
 
 class SVHNDataset(Dataset):
     def __init__(self, db_path='', use_extra=True):
@@ -21,7 +23,6 @@ class SVHNDataset(Dataset):
             self.train_image = mat['X'].astype(np.float32)
             self.train_label = mat['y']
             self.train_image = np.clip(self.train_image / 255.0, a_min=0.0, a_max=1.0)
-            np.save(self.train_file + ".npy", self.train_image)
         else:
             print("SVHN dataset train files not found")
             exit(-1)

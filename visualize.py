@@ -41,6 +41,7 @@ class ConditionalSampleVisualizer(Visualizer):
         if self.fig is None:
             self.fig, self.ax = plt.subplots(1, len(layers))
         latent_code = self.network.random_latent_code()
+
         for i, layer in enumerate(layers):
             samples = np.zeros([num_rows*num_rows]+self.dataset.data_dims)
             samples_ptr = 0
@@ -77,8 +78,8 @@ class ConditionalSampleVisualizer(Visualizer):
             else:
                 print("Warning: no samples generated during visualization")
         # np.save('samples', canvas)
-        self.fig_to_file()
         self.fig.suptitle('Conditional Samples for %s' % self.network.name)
+        self.fig_to_file()
         plt.draw()
         plt.pause(0.01)
 
@@ -118,8 +119,9 @@ class SampleVisualizer(Visualizer):
             #     os.mkdir('result_log/%s' % self.network.name)
             # np.save('result_log/%s/samples%d' % (self.network.name, self.count), canvas)
             # np.save('result_log/%s/samples' % self.network.name, canvas)
-            self.fig_to_file()
             self.fig.suptitle('Samples for %s' % self.network.name)
+            self.fig_to_file()
+
             plt.draw()
             plt.pause(0.01)
 
@@ -166,8 +168,8 @@ class ManifoldSampleVisualizer(Visualizer):
                     self.ax[i].imshow(canvas)
                 self.ax[i].xaxis.set_visible(False)
                 self.ax[i].yaxis.set_visible(False)
-        self.fig_to_file()
         self.fig.suptitle('Manifold Samples for %s' % self.network.name)
+        self.fig_to_file()
         plt.draw()
         plt.pause(0.01)
 
