@@ -71,7 +71,7 @@ class Network:
         self.batch_size = batch_size
         self.learning_rate_placeholder = tf.placeholder(shape=[], dtype=tf.float32, name="lr_placeholder")
 
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9, allow_growth=True)
+        gpu_options = tf.GPUOptions(allow_growth=True)
         self.sess = tf.InteractiveSession(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True))
         # A unique name should be given to each instance of subclasses during initialization
         self.name = "default"
