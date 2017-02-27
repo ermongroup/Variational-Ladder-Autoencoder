@@ -58,3 +58,5 @@ You should see decoupling like below
 - To change batch size, add ``` --batch_size=[size]```
 - To visualize and plot the autoencoding reconstruction of the model, add ```--plot_reconstruction```
 - To add Gaussian and salt and pepper noise to perform denoise training add ```--denoise_train```
+- To control the number of batches before we visualize and make plots, use ```--vis_frequency=[num_batch]```
+

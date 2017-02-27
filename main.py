@@ -19,6 +19,8 @@ parser.add_argument('--plot_reconstruction', dest='plot_reconstruction', action=
                     help='Plot reconstruction')
 parser.add_argument('--use_gui', dest='use_gui', action='store_true',
                     help='Display the results with a GUI window')
+parser.add_argument('--vis_frequency', type=int, default=1000,
+                    help='How many train batches before we perform visualization')
 args = parser.parse_args()
 
 import matplotlib

@@ -52,7 +52,8 @@ class NoisyTrainer:
         if self.network.do_generate_manifold_samples:
             sample_visualizer_manifold = ManifoldSampleVisualizer(self.network, self.dataset)
 
-        for iteration in range(10000000):
+        iteration = 0
+        while True:
             iter_time = time.time()
             images = self.dataset.next_batch(self.batch_size)
             noisy_input = self.get_noisy_input(images)
@@ -62,8 +63,8 @@ class NoisyTrainer:
                 print("Iteration %d: Reconstruction loss %f, time per iter %fs" %
                       (iteration, train_loss, time.time() - iter_time))
 
-            if iteration % 500 == 0:
-                test_error = self.test(iteration//500, 5)
+            if iteration % self.args.vis_frequency == 0:
+                test_error = self.test(iteration//self.args.vis_frequency, 5)
                 print("Reconstruction error @%d per pixel: " % iteration, test_error)
 
                 layers = [layer for layer in self.network.random_latent_code()]
@@ -75,6 +76,7 @@ class NoisyTrainer:
                     sample_visualizer_conditional.visualize(layers=layers, num_rows=10, use_gui=self.args.use_gui)
                 if self.network.do_generate_manifold_samples:
                     sample_visualizer_manifold.visualize(layers=layers, num_rows=30, use_gui=self.args.use_gui)
+            iteration += 1
 
     """ Returns reconstruction error per pixel """
     def test(self, epoch, num_batch=3):
