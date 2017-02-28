@@ -2,17 +2,23 @@
 
 
 
-This is the implementation of the Variational Ladder Autoencoder. Training on this architecture with standard VAE disentangles high and low level features without using any other prior information or inductive bias. This has been successful on MNIST, SVHN, and CelebA. 
+This is the implementation of the [Variational Ladder Autoencoder](https://arxiv.org/abs/1702.08396). Training on this architecture with standard VAE disentangles high and low level features without using any other prior information or inductive bias. This has been successful on MNIST, SVHN, and CelebA. 
 
-LSUN is a little difficult for VAE with pixel-wise reconstruction loss. However another recent line of progress ```https://github.com/ShengjiaZhao/Sequential-VAE``` can generate sharp results on LSUN as well. This architecture serve as the baseline architecture for that model.
-
-To run the experiments, make sure you have a working environment of tensorflow with either python 2 or 3. Simply download the code and run the following commands. Tested with tensorflow 0.12.1
+LSUN is a little difficult for VAE with pixel-wise reconstruction loss. However with another [recently work](https://github.com/ShengjiaZhao/Sequential-VAE) we can generate sharp results on LSUN as well. This architecture serve as the baseline architecture for that model.
 
 # Training with Default Options
 
+## Setup
+
+You need to have the following
+
+- python 2 or 3 (More stable on python 2)
+- tensorflow (tested on 0.12)
+- numpy, scipy, matplotlib
+
 ## MNIST
 
-You don't need to prepare the dataset for MNIST so long as you installed the examples that come with standard tensorflow distributions. If you can import ```tensorflow.examples.tutorials.mnist``` then simply run 
+You don't need to prepare the dataset for MNIST if you installed the examples that come with standard tensorflow distributions. If you can import ```tensorflow.examples.tutorials.mnist``` then simply run 
 
 ``` python main.py --dataset=mnist```
 
@@ -34,6 +40,8 @@ You should see decoupling like below
 
 ![vladder_svhn](plots/vladder_svhn.png)
 
+where we sample one layer randomly holding other layers fixed. The model has learned to disentangle color, digit variations, digit identity and general style.
+
 ## CelebA
 
 For CelebA download the dataset from http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
@@ -52,11 +60,12 @@ You should see decoupling like below
 
 # Additional Options
 
-- To use a particular GPU/GPUs add option ```--gpus=[ids]``` such as ```--gpus=0,1``` to use GPU 0 and 1. No additional multi-gpu support is used other than the default tensorflow support. In general for any of the recommended datasets the network generates good samples after running for about an hour on a single Titan X. The visualizations in the paper are produced after 1-2 days of training, but the improvement becomes marginal after the initial few hours. 
-- To use other architectures other than default, use ```--netname=[name]```. For supported architectures please refer to code. The name is the unique identifier for the network, and all related training log, visualizations, and checkpoint files, etc will be stored in the directory ```$pwd/model/netname```. For example, to run visualization with tensorboard use ``` tensorboard --logdir=[that directory]```.
+- To use a particular GPU/GPUs add option ```--gpus=[ids]``` such as ```--gpus=0,1``` to use GPU 0 and 1. In general for any of the recommended datasets the network generates good samples after running for about an hour on a single Titan X. The visualizations in the paper are produced after 1-2 days of training, but the improvement becomes marginal after the initial few hours. 
+- To use other architectures other than default, use ```--netname=[name]```. For supported architectures please refer to code. The name is the unique identifier for a network configuration, and all related training log, visualizations, and checkpoint files, etc will be stored in the directory ```$pwd/model/netname```. For example, to run visualization with tensorboard use ``` tensorboard --logdir=[that directory]```.
 - To also visualize the training process with a GUI window add ```--use_gui```. By default all plots will be stored to network directory, this will also plot them in a window in addition to that.
 - To change batch size, add ``` --batch_size=[size]```
 - To visualize and plot the autoencoding reconstruction of the model, add ```--plot_reconstruction```
 - To add Gaussian and salt and pepper noise to perform denoise training add ```--denoise_train```
 - To control the number of batches before we visualize and make plots, use ```--vis_frequency=[num_batch]```
+
 

@@ -27,7 +27,8 @@ class SmallLayers:
         with tf.variable_scope("inference1"):
             fc1 = fc_bn_lrelu(latent1, self.network.cs[3])
             fc2 = fc_bn_lrelu(fc1, self.network.cs[3])
-            return fc2
+            fc3 = tf.contrib.layers.fully_connected(fc2, self.network.cs[3], activation_fn=tf.identity)
+            return fc3
 
     def ladder1(self, latent1):
         with tf.variable_scope("ladder1"):
