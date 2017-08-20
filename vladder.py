@@ -67,7 +67,7 @@ class VLadder(Network):
         self.regularization = 0.0
         if self.ladder0_dim > 0:
             self.iladder0_mean, self.iladder0_stddev = layers.ladder0(self.input_placeholder)
-            self.iladder0_sample = self.iladder0_mean + tf.mul(self.iladder0_stddev,
+            self.iladder0_sample = self.iladder0_mean + tf.multiply(self.iladder0_stddev,
                                                                tf.random_normal([self.batch_size, self.ladder0_dim]))
 
             self.latent0_kl = tf.reduce_sum(-tf.log(self.iladder0_stddev) + 0.5 * tf.square(self.iladder0_stddev) +
@@ -79,7 +79,7 @@ class VLadder(Network):
             self.ilatent1_hidden = layers.inference0(self.input_placeholder)
             if self.ladder1_dim > 0:
                 self.iladder1_mean, self.iladder1_stddev = layers.ladder1(self.ilatent1_hidden)
-                self.iladder1_sample = self.iladder1_mean + tf.mul(self.iladder1_stddev,
+                self.iladder1_sample = self.iladder1_mean + tf.multiply(self.iladder1_stddev,
                                                                    tf.random_normal([self.batch_size, self.ladder1_dim]))
                 self.latent1_kl = tf.reduce_sum(-tf.log(self.iladder1_stddev) + 0.5 * tf.square(self.iladder1_stddev) +
                                                 0.5 * tf.square(self.iladder1_mean) - 0.5) / self.batch_size
@@ -90,7 +90,7 @@ class VLadder(Network):
             self.ilatent2_hidden = layers.inference1(self.ilatent1_hidden)
             if self.ladder2_dim > 0:
                 self.iladder2_mean, self.iladder2_stddev = layers.ladder2(self.ilatent2_hidden)
-                self.iladder2_sample = self.iladder2_mean + tf.mul(self.iladder2_stddev,
+                self.iladder2_sample = self.iladder2_mean + tf.multiply(self.iladder2_stddev,
                                                                    tf.random_normal([self.batch_size, self.ladder2_dim]))
                 self.latent2_kl = tf.reduce_sum(-tf.log(self.iladder2_stddev) + 0.5 * tf.square(self.iladder2_stddev) +
                                                 0.5 * tf.square(self.iladder2_mean) - 0.5) / self.batch_size
@@ -101,7 +101,7 @@ class VLadder(Network):
             self.ilatent3_hidden = layers.inference2(self.ilatent2_hidden)
             if self.ladder3_dim > 0:
                 self.iladder3_mean, self.iladder3_stddev = layers.ladder3(self.ilatent3_hidden)
-                self.iladder3_sample = self.iladder3_mean + tf.mul(self.iladder3_stddev,
+                self.iladder3_sample = self.iladder3_mean + tf.multiply(self.iladder3_stddev,
                                                                    tf.random_normal([self.batch_size, self.ladder3_dim]))
                 self.latent3_kl = tf.reduce_sum(-tf.log(self.iladder3_stddev) + 0.5 * tf.square(self.iladder3_stddev) +
                                                 0.5 * tf.square(self.iladder3_mean) - 0.5) / self.batch_size

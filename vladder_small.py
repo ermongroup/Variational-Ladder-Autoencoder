@@ -55,7 +55,7 @@ class SmallLayers:
             elif method is 'gated_add':
                 gate = tf.get_variable("gate", shape=latent.get_shape()[1:], initializer=tf.constant_initializer(0.1))
                 tf.summary.histogram(name + "_noise_gate", gate)
-                return latent + tf.mul(gate, ladder)
+                return latent + tf.multiply(gate, ladder)
 
     def generative0(self, latent1, ladder0=None, reuse=False):
         with tf.variable_scope("generative0") as gs:
@@ -72,7 +72,7 @@ class SmallLayers:
                 print("Generative layer must have input")
                 exit(0)
             fc1 = fc_bn_relu(latent1, int(self.network.fs[2] * self.network.fs[2] * self.network.cs[2]))
-            fc1 = tf.reshape(fc1, tf.pack([tf.shape(fc1)[0], self.network.fs[2], self.network.fs[2], self.network.cs[2]]))
+            fc1 = tf.reshape(fc1, tf.stack([tf.shape(fc1)[0], self.network.fs[2], self.network.fs[2], self.network.cs[2]]))
             conv1 = conv2d_t_bn_relu(fc1, self.network.cs[1], [4, 4], 2)
             output = tf.contrib.layers.convolution2d_transpose(conv1, self.network.data_dims[-1], [4, 4], 2,
                                                                activation_fn=tf.sigmoid)

@@ -77,8 +77,8 @@ class LargeLayers:
             return latent + ladder
         elif method is 'gated_add':
             gate = tf.get_variable("gate", shape=ladder.get_shape()[1:], initializer=tf.constant_initializer(0.1))
-            tf.histogram_summary(name + "_noise_gate", gate)
-            return latent + tf.mul(gate, ladder)
+            tf.summary.histogram(name + "_noise_gate", gate)
+            return latent + tf.stack(gate, ladder)
 
     def generative0(self, latent1, ladder0, reuse=False):
         with tf.variable_scope("generative0") as gs:

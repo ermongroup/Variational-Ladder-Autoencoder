@@ -111,7 +111,7 @@ class MediumLayers:
                 print("Generative layer must have input")
                 exit(0)
             fc1 = fc_bn_relu(latent3, int(self.network.fs[3] * self.network.fs[3] * self.network.cs[3]))
-            fc1 = tf.reshape(fc1, tf.pack([tf.shape(fc1)[0], self.network.fs[3], self.network.fs[3], self.network.cs[3]]))
+            fc1 = tf.reshape(fc1, tf.stack([tf.shape(fc1)[0], self.network.fs[3], self.network.fs[3], self.network.cs[3]]))
             conv1 = conv2d_t_bn_relu(fc1, self.network.cs[3], [4, 4], 2)
             conv2 = conv2d_t_bn_relu(conv1, self.network.cs[2], [4, 4], 1)
             return conv2
