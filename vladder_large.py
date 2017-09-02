@@ -72,7 +72,7 @@ class LargeLayers:
     def combine_noise(self, latent, ladder, name="default"):
         method = 'concat'
         if method is 'concat':
-            return tf.concat(len(latent.get_shape())-1, [latent, ladder])
+            return tf.concat(values=[latent, ladder], axis=len(latent.get_shape())-1)
         elif method is 'add':
             return latent + ladder
         elif method is 'gated_add':

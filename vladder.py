@@ -174,9 +174,11 @@ class VLadder(Network):
         self.reg_coeff = tf.placeholder_with_default(1.0, shape=[], name="regularization_coeff")
 
         if self.reg == 'kl':
-            self.loss = self.reg_coeff * self.regularization + 16.0 * np.prod(self.data_dims) * self.reconstruction_loss
+            self.reconstruction_loss *= 16.0 * np.prod(self.data_dims)
+            self.loss = self.reg_coeff * self.regularization + self.reconstruction_loss
         elif self.reg == 'mmd':
-            self.loss = 10 * self.regularization + self.reconstruction_loss
+            self.regularization *= 10
+            self.loss = self.regularization + self.reconstruction_loss
 
         tf.summary.scalar("reconstruction_loss", self.reconstruction_loss)
         tf.summary.scalar("regularization_loss", self.regularization)

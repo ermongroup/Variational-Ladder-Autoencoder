@@ -68,7 +68,7 @@ class MediumLayers:
                 ladder0 = fc_bn_relu(ladder0, int(self.network.fs[1] * self.network.fs[1] * self.network.cs[1]))
                 ladder0 = tf.reshape(ladder0, [-1, self.network.fs[1], self.network.fs[1], self.network.cs[1]])
                 if latent1 is not None:
-                    latent1 = tf.concat(3, [latent1, ladder0])
+                    latent1 = tf.concat(values=[latent1, ladder0], axis=3)
                 else:
                     latent1 = ladder0
             elif latent1 is None:
@@ -88,7 +88,7 @@ class MediumLayers:
                 ladder1 = fc_bn_relu(ladder1, int(self.network.fs[2] * self.network.fs[2] * self.network.cs[2]))
                 ladder1 = tf.reshape(ladder1, [-1, self.network.fs[2], self.network.fs[2], self.network.cs[2]])
                 if latent2 is not None:
-                    latent2 = tf.concat(3, [latent2, ladder1])
+                    latent2 = tf.concat(values=[latent2, ladder1], axis=3)
                 else:
                     latent2 = ladder1
             elif latent2 is None:
@@ -104,7 +104,7 @@ class MediumLayers:
                 gs.reuse_variables()
             if ladder2 is not None:
                 if latent3 is not None:
-                    latent3 = tf.concat(1, [latent3, ladder2])
+                    latent3 = tf.concat(values=[latent3, ladder2], axis=1)
                 else:
                     latent3 = ladder2
             elif latent3 is None:
