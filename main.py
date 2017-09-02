@@ -52,6 +52,6 @@ else:
     print("Unknown dataset")
     exit(-1)
 
-model = VLadder(dataset, name=args.netname, batch_size=args.batch_size)
+model = VLadder(dataset, name=args.netname, reg=args.reg, batch_size=args.batch_size)
 trainer = NoisyTrainer(model, dataset, args)
 trainer.train()

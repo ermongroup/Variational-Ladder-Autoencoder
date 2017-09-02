@@ -3,7 +3,7 @@ from vladder_medium import *
 from vladder_small import *
 
 class VLadder(Network):
-    def __init__(self, dataset, name=None, batch_size=100):
+    def __init__(self, dataset, name=None, reg='kl', batch_size=100):
         Network.__init__(self, dataset, batch_size)
         if name is None or name == '':
             self.name = "vladder_%s" % dataset.name
@@ -16,7 +16,9 @@ class VLadder(Network):
 
         self.fs = [self.data_dims[0], self.data_dims[0] // 2, self.data_dims[0] // 4, self.data_dims[0] // 8,
                    self.data_dims[0] // 16]
-        self.reg = 'kl'
+        self.reg = reg
+        if self.reg != 'kl' and self.reg != 'mmd':
+            print("Unknown regularization, supported: kl, mmd")
 
         # Configurations
         if self.name == "vladder_celebA":
