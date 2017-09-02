@@ -57,11 +57,11 @@ class NoisyTrainer:
             iter_time = time.time()
             images = self.dataset.next_batch(self.batch_size)
             noisy_input = self.get_noisy_input(images)
-            train_loss = self.network.train(noisy_input, images)
+            recon_loss, reg_loss = self.network.train(noisy_input, images)
 
             if iteration % 20 == 0:
-                print("Iteration %d: Reconstruction loss %f, time per iter %fs" %
-                      (iteration, train_loss, time.time() - iter_time))
+                print("Iteration %d: Reconstruction loss %f, Regularization loss %f, time per iter %fs" %
+                      (iteration, recon_loss, reg_loss, time.time() - iter_time))
 
             if iteration % self.args.vis_frequency == 0:
                 test_error = self.test(iteration//self.args.vis_frequency, 5)
