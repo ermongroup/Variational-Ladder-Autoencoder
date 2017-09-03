@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 import os
 
 class SVHNDataset(Dataset):
-    def __init__(self, db_path='', use_extra=False):
+    def __init__(self, db_path='', use_extra=True):
         Dataset.__init__(self)
         print("Loading files")
         self.data_dims = [32, 32, 3]
