@@ -6,42 +6,42 @@ class SmallLayers:
     def __init__(self, network):
         self.network = network
 
-    def inference0(self, input_x):
+    def inference0(self, input_x, is_training=True):
         with tf.variable_scope("inference0"):
-            conv1 = conv2d_bn_lrelu(input_x, self.network.cs[1], [4, 4], 2)
-            conv2 = conv2d_bn_lrelu(conv1, self.network.cs[2], [4, 4], 2)
+            conv1 = conv2d_bn_lrelu(input_x, self.network.cs[1], [4, 4], 2, is_training)
+            conv2 = conv2d_bn_lrelu(conv1, self.network.cs[2], [4, 4], 2, is_training)
             conv2 = tf.reshape(conv2, [-1, np.prod(conv2.get_shape().as_list()[1:])])
             fc1 = tf.contrib.layers.fully_connected(conv2, self.network.cs[3], activation_fn=tf.identity)
             return fc1
 
-    def ladder0(self, input_x):
+    def ladder0(self, input_x, is_training=True):
         with tf.variable_scope("ladder0"):
-            conv1 = conv2d_bn_lrelu(input_x, self.network.cs[1], [4, 4], 2)
-            conv2 = conv2d_bn_lrelu(conv1, self.network.cs[2], [4, 4], 2)
+            conv1 = conv2d_bn_lrelu(input_x, self.network.cs[1], [4, 4], 2, is_training)
+            conv2 = conv2d_bn_lrelu(conv1, self.network.cs[2], [4, 4], 2, is_training)
             conv2 = tf.reshape(conv2, [-1, np.prod(conv2.get_shape().as_list()[1:])])
             fc1_mean = tf.contrib.layers.fully_connected(conv2, self.network.ladder0_dim, activation_fn=tf.identity)
             fc1_stddev = tf.contrib.layers.fully_connected(conv2, self.network.ladder0_dim, activation_fn=tf.sigmoid)
             return fc1_mean, fc1_stddev
 
-    def inference1(self, latent1):
+    def inference1(self, latent1, is_training=True):
         with tf.variable_scope("inference1"):
-            fc1 = fc_bn_lrelu(latent1, self.network.cs[3])
-            fc2 = fc_bn_lrelu(fc1, self.network.cs[3])
+            fc1 = fc_bn_lrelu(latent1, self.network.cs[3], is_training)
+            fc2 = fc_bn_lrelu(fc1, self.network.cs[3], is_training)
             fc3 = tf.contrib.layers.fully_connected(fc2, self.network.cs[3], activation_fn=tf.identity)
             return fc3
 
-    def ladder1(self, latent1):
+    def ladder1(self, latent1, is_training=True):
         with tf.variable_scope("ladder1"):
-            fc1 = fc_bn_lrelu(latent1, self.network.cs[3])
-            fc2 = fc_bn_lrelu(fc1, self.network.cs[3])
+            fc1 = fc_bn_lrelu(latent1, self.network.cs[3], is_training)
+            fc2 = fc_bn_lrelu(fc1, self.network.cs[3], is_training)
             fc3_mean = tf.contrib.layers.fully_connected(fc2, self.network.ladder1_dim, activation_fn=tf.identity)
             fc3_stddev = tf.contrib.layers.fully_connected(fc2, self.network.ladder1_dim, activation_fn=tf.sigmoid)
             return fc3_mean, fc3_stddev
 
-    def ladder2(self, latent1):
+    def ladder2(self, latent1, is_training=True):
         with tf.variable_scope("ladder2"):
-            fc1 = fc_bn_lrelu(latent1, self.network.cs[3])
-            fc2 = fc_bn_lrelu(fc1, self.network.cs[3])
+            fc1 = fc_bn_lrelu(latent1, self.network.cs[3], is_training)
+            fc2 = fc_bn_lrelu(fc1, self.network.cs[3], is_training)
             fc3_mean = tf.contrib.layers.fully_connected(fc2, self.network.ladder2_dim, activation_fn=tf.identity)
             fc3_stddev = tf.contrib.layers.fully_connected(fc2, self.network.ladder2_dim, activation_fn=tf.sigmoid)
             return fc3_mean, fc3_stddev
@@ -57,7 +57,7 @@ class SmallLayers:
                 tf.summary.histogram(name + "_noise_gate", gate)
                 return latent + tf.multiply(gate, ladder)
 
-    def generative0(self, latent1, ladder0=None, reuse=False):
+    def generative0(self, latent1, ladder0=None, reuse=False, is_training=True):
         with tf.variable_scope("generative0") as gs:
             if reuse:
                 gs.reuse_variables()
@@ -71,20 +71,20 @@ class SmallLayers:
             elif latent1 is None:
                 print("Generative layer must have input")
                 exit(0)
-            fc1 = fc_bn_relu(latent1, int(self.network.fs[2] * self.network.fs[2] * self.network.cs[2]))
+            fc1 = fc_bn_relu(latent1, int(self.network.fs[2] * self.network.fs[2] * self.network.cs[2]), is_training)
             fc1 = tf.reshape(fc1, tf.stack([tf.shape(fc1)[0], self.network.fs[2], self.network.fs[2], self.network.cs[2]]))
-            conv1 = conv2d_t_bn_relu(fc1, self.network.cs[1], [4, 4], 2)
+            conv1 = conv2d_t_bn_relu(fc1, self.network.cs[1], [4, 4], 2, is_training)
             output = tf.contrib.layers.convolution2d_transpose(conv1, self.network.data_dims[-1], [4, 4], 2,
                                                                activation_fn=tf.sigmoid)
             output = (self.network.dataset.range[1] - self.network.dataset.range[0]) * output + self.network.dataset.range[0]
             return output
 
-    def generative1(self, latent2, ladder1=None, reuse=False):
+    def generative1(self, latent2, ladder1=None, reuse=False, is_training=True):
         with tf.variable_scope("generative1") as gs:
             if reuse:
                 gs.reuse_variables()
             if ladder1 is not None:
-                ladder1 = fc_bn_relu(ladder1, self.network.cs[3])
+                ladder1 = fc_bn_relu(ladder1, self.network.cs[3], is_training)
                 if latent2 is not None:
                     latent2 = self.combine_noise(latent2, ladder1, name="generative1")
                 else:
@@ -92,17 +92,17 @@ class SmallLayers:
             elif latent2 is None:
                 print("Generative layer must have input")
                 exit(0)
-            fc1 = fc_bn_relu(latent2, self.network.cs[3])
-            fc2 = fc_bn_relu(fc1, self.network.cs[3])
+            fc1 = fc_bn_relu(latent2, self.network.cs[3], is_training)
+            fc2 = fc_bn_relu(fc1, self.network.cs[3], is_training)
             fc3 = tf.contrib.layers.fully_connected(fc2, self.network.cs[3], activation_fn=tf.identity)
             return fc3
 
-    def generative2(self, latent3, ladder2, reuse=False):
+    def generative2(self, latent3, ladder2, reuse=False, is_training=True):
         with tf.variable_scope("generative2") as gs:
             if reuse:
                 gs.reuse_variables()
-            fc1 = fc_bn_relu(ladder2, self.network.cs[3])
-            fc2 = fc_bn_relu(fc1, self.network.cs[3])
+            fc1 = fc_bn_relu(ladder2, self.network.cs[3], is_training)
+            fc2 = fc_bn_relu(fc1, self.network.cs[3], is_training)
             fc3 = tf.contrib.layers.fully_connected(fc2, self.network.cs[3], activation_fn=tf.identity)
             return fc3
 

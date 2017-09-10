@@ -78,6 +78,21 @@ class NoisyTrainer:
                     sample_visualizer_manifold.visualize(layers=layers, num_rows=30, use_gui=self.args.use_gui)
             iteration += 1
 
+    def visualize(self):
+        layers = [layer for layer in self.network.random_latent_code()]
+        layers.sort()
+
+        # Visualization
+        if self.network.do_generate_samples:
+            sample_visualizer = SampleVisualizer(self.network, self.dataset)
+            sample_visualizer.visualize(num_rows=10, use_gui=self.args.use_gui)
+        if self.network.do_generate_conditional_samples:
+            sample_visualizer_conditional = ConditionalSampleVisualizer(self.network, self.dataset)
+            sample_visualizer_conditional.visualize(layers=layers, num_rows=10, use_gui=self.args.use_gui)
+        if self.network.do_generate_manifold_samples:
+            sample_visualizer_manifold = ManifoldSampleVisualizer(self.network, self.dataset)
+            sample_visualizer_manifold.visualize(layers=layers, num_rows=30, use_gui=self.args.use_gui)
+
     """ Returns reconstruction error per pixel """
     def test(self, epoch, num_batch=3):
         error = 0.0
