@@ -8,13 +8,11 @@
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--no_train', type=bool, default=False)
 parser.add_argument('--gpus', type=str, default='')
 parser.add_argument('--dataset', type=str, default='celebA')
 parser.add_argument('--netname', type=str, default='')
 parser.add_argument('--batch_size', type=int, default=100)
 parser.add_argument('--db_path', type=str, default='')
-parser.add_argument('--reg', type=str, default='kl')
 parser.add_argument('--denoise_train', dest='denoise_train', action='store_true',
                     help='Use denoise training by adding Gaussian/salt and pepper noise')
 parser.add_argument('--plot_reconstruction', dest='plot_reconstruction', action='store_true',
@@ -53,9 +51,6 @@ else:
     print("Unknown dataset")
     exit(-1)
 
-model = VLadder(dataset, name=args.netname, reg=args.reg, batch_size=args.batch_size, restart=not args.no_train)
+model = VLadder(dataset, name=args.netname, batch_size=args.batch_size)
 trainer = NoisyTrainer(model, dataset, args)
-if args.no_train:
-    trainer.visualize()
-else:
-    trainer.train()
+trainer.train()
