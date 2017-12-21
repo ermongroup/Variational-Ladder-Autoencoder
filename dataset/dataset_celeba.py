@@ -6,7 +6,7 @@ import scipy.misc as misc
 from matplotlib import pyplot as plt
 
 class CelebADataset(Dataset):
-    def __init__(self, db_path="celebA", crop=True):
+    def __init__(self, db_path="/data/celebA/img_align", crop=True):
         Dataset.__init__(self)
         self.data_files = glob(os.path.join(db_path, "*.jpg"))
         if len(self.data_files) < 100000:

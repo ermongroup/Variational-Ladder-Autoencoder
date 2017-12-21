@@ -60,6 +60,7 @@ You should see decoupling like below
 
 # Additional Options
 
+- To use another type of regularization use ```--reg=[reg]```. Currently support ```--reg=kl``` for KL(q(z|x)||p(z)) and ```--reg=mmd``` for MMD(q(z), p(z)).
 - To use a particular GPU/GPUs add option ```--gpus=[ids]``` such as ```--gpus=0,1``` to use GPU 0 and 1. In general for any of the recommended datasets the network generates good samples after running for about an hour on a single Titan X. The visualizations in the paper are produced after 1-2 days of training, but the improvement becomes marginal after the initial few hours. 
 - To use other architectures other than default, use ```--netname=[name]```. For supported architectures please refer to code. The name is the unique identifier for a network configuration, and all related training log, visualizations, and checkpoint files, etc will be stored in the directory ```$pwd/model/netname```. For example, to run visualization with tensorboard use ``` tensorboard --logdir=[that directory]```.
 - To also visualize the training process with a GUI window add ```--use_gui```. By default all plots will be stored to network directory, this will also plot them in a window in addition to that.
